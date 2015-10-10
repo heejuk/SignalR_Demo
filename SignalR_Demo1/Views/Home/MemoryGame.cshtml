@@ -1,0 +1,255 @@
+﻿@{
+    ViewBag.Title = "MemoryGame";
+}
+
+@section head
+{
+    <link href="~/Content/bootstrap.css" rel="stylesheet" />
+    <link href="~/Content/bootstrap-theme.css" rel="stylesheet" />
+    <script src="~/Scripts/handlebars-v4.0.2.js"></script>
+    <script src="~/Scripts/jquery.signalR-2.2.0.js"></script>
+    <script src="signalr/hubs"></script>
+}
+
+<style>
+    .list-inline li {
+        padding-left: 2px;
+        padding-right: 2px;
+        padding-bottom: 6px;
+    }
+    .panel.flip {
+        -moz-transform: rotateX(-180deg);
+        -webkit-transform: rotateX(-180deg);
+        -o-transform: rotateX(-180deg);
+        -ms-transform: rotateX(-180deg);
+    }
+    .panel {
+        position: relative;
+        width: 120px;
+        height: 120px;
+        margin: 10px;
+        -webkit-transform-style: preserve-3d;
+        transform-style:preserve-3d;
+        -webkit-transition: 0.5s;
+        transition: transform 0.5s;
+    }
+    .panel .back {
+        position: absolute;
+        z-index: 1;
+        width: 120px;
+        height: 120px;
+        border:1px solid black;
+        background: -prefix-linear-gradient(top, green, white);
+        background: linear-gradient(to bottom, green, white);
+        font-size:80px;
+        line-height:120px;
+        text-align:center;
+        cursor: pointer;
+        -webkit-backface-visibility: hidden ;
+        backface-visibility: hidden;
+        -webkit-transform: rotateX(0);
+        -moz-transform: rotateX(0);
+        -o-transform: rotateX(0);
+        -ms-transform:rotateX(0);
+    }
+    .panel .front {
+        position: absolute;
+        width: 120px;
+        height: 120px;
+        border:1px solid black;
+        font-size:80px;
+        line-height:120px;
+        text-align:center;
+        -webkit-transform: rotateX(-180deg);
+        -moz-transform: rotateX(-180deg);
+        -o-transform: rotateX(-180deg);
+        -ms-transform:rotateX(-180deg);
+        cursor: pointer;
+    }
+</style>
+
+<div class="container">
+    <div class="row">
+        <div style="col-lg-2">
+            <div style="padding:2px">
+                <h3 id="name">User</h3>
+                <input type="text" id="usernameTb" class="form-control" />
+                <span class="help-block" id="alert">Please enter your name and click <strong>join</strong> button.</span>
+                <input type="button" id="join" value="join" class="btn btn-primary" />
+                <h3>Matches</h3>
+                <ul id="wins" class="list-inline">
+
+                </ul>
+            </div>
+        </div>
+        <div class="col-lg-10" id="board">
+        </div>
+    </div>
+</div>
+
+<script id="card-template" type="text/x-handlebars-template">
+    <div class="row">
+        {{#each Pieces}}
+            <div id="{{Name}}" class="click panel col-lg-2">
+                <div class="front">
+                    {{Image}}
+                    @*<img src="{{Image}}" width="150" height="150" />*@
+                </div>
+                <div class="back">
+                    ?
+                    @*<img src="/Content/img/back.png" width="118" height="118" />*@
+                </div>
+            </div>
+            {{#endRow @@Index}}
+                </div>
+                <div class="row">
+            {{/endRow}}
+        {{/each}}
+    </div>
+
+</script>
+
+<script type="text/javascript">
+    $(function () {
+
+
+        $('#join').attr('disabled', 'disabled');
+
+        var gameHub = $.connection.gameHub;
+
+        $.connection.hub.start().done(function () {
+            $('#join').removeAttr('disabled');
+            var myClientId = $.connection.hub.id;
+
+        });
+
+        $('#join').click(function () {
+            var un = $('#usernameTb').val();
+            gameHub.server.join(un);
+        });
+
+
+        var userId;
+        gameHub.client.playerJoined = function (user) {
+            userId = user.Id;
+            $('#usernameTb').attr('disabled', 'disabled');
+            $('#join').attr('disabled', 'disabled');
+            alert(user.Id);
+        };
+
+        Handlebars.registerHelper('endRow', function (conditional, options) {
+            if ((conditional + 1) % 5 == 0 && conditional > 0) {
+                return options.fn(this);
+            };
+            return "";
+        });
+
+        gameHub.client.buildBoard = function (game) {
+            // compile our template
+            if (game == null) alert('game is null');
+            alert(typeof game);
+            alert(JSON.stringify(game.Board));
+            //gameHub.server.refreshGame(userId);
+
+            var template = Handlebars.compile($('#card-template').html());
+            // render the board
+            
+            $('#board').html(template(game.Board));
+
+            //if (userId == game.WhosTurn) {
+            //    $('#alert').html("Let's begin the game. You get to go first!");
+            //} else {
+            //    $('#alert').html("Let's begin the game. Your opponent gets to go first!");
+            //}
+
+            $('div[id^=card-]').click(function (e) {
+                e.preventDefault();
+
+                var id = this.id;
+                var card = $('#' + id);
+
+                if (!card.hasClass('match') && !card.hasClass('flip')) {
+                    gameHub.server.flipOnePlayer(id).done(function (result) {
+                        if (result) {
+                            gameHub.server.checkCardOnePlayer(id);
+                        }
+                    });
+                }
+            });
+
+        };
+
+        gameHub.client.flipCard = function (card) {
+            var c = $("#card-" + card.Id);
+            $(c).addClass('flip');
+        };
+
+        gameHub.client.resetFlip = function (cardA, cardB) {
+            var cA = $("#card-" + cardA.Id);
+            var cB = $("#card-" + cardB.Id);
+
+            var delay = setTimeout(function () {
+                cA.removeClass("flip");
+                cB.removeClass("flip");
+            }, 1500);
+        };
+
+        gameHub.client.showMatch = function (card, winner) {
+            $("#card-" + card.Id).addClass("match");
+            $("#card-" + card.Pair).addClass("match");
+
+            $('#alert').html(winner + "found a match!");
+            if(winner == $('#usernameTb').val()){
+                $('#wins').append("<li><span>" + card.Image + "</span></li>");
+            }
+        };
+
+        gameHub.client.winner = function (card, winner) {
+            $("#card-" + card.Id).addClass("match");
+            $("#card-" + card.Pair).addClass("match");
+
+            $('#alert').html(winner + "found a match!");
+            if (winner == $('#usernameTb').val()) {
+                $('#modal-headline').html("You won!");
+            } else {
+                $('#modal-headline').html("Sorry, you lost!");
+            }
+            //$('#winModal').modal({ show: true }).on('hide.bs.modal', function () {
+            //    $('#board').html('');
+            //    $('#usernameTb').removeAttr('disabled');
+            //    $('#join').removeAttr('disabled');
+                $('#wins').html('');
+            //    $('#alert').html("Please enter your name and click join to begin playing a match.");
+            //});
+
+        };
+
+        gameHub.client.waitingList = function () {
+            $('#alert').html("At this time there is not an opponet. As soon as one joins your game will begin.");
+        };
+
+        gameHub.client.disconnected(function () {
+            $.connection.hub.stop();
+            alert("Disconnected. Reason: " + gameHub.lastError.message);
+        });
+
+        gameHub.client.playerExists = function () {
+            $('#alert').html("Input another name, please.");
+
+        };
+        
+    });
+</script>
+
+<div class="modal fade" id="winModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+                <h1 id="modal-headline"></h1>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>

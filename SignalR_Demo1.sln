@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SignalR_Demo1", "SignalR_Demo1\SignalR_Demo1.csproj", "{654679DE-DB93-4FF9-BEE4-92D8066182D2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SignalR_Demo1.Tests", "SignalR_Demo1.Tests\SignalR_Demo1.Tests.csproj", "{319CFC39-E0F3-4789-9914-871D8A0B5A68}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{654679DE-DB93-4FF9-BEE4-92D8066182D2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{654679DE-DB93-4FF9-BEE4-92D8066182D2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{654679DE-DB93-4FF9-BEE4-92D8066182D2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{654679DE-DB93-4FF9-BEE4-92D8066182D2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{319CFC39-E0F3-4789-9914-871D8A0B5A68}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{319CFC39-E0F3-4789-9914-871D8A0B5A68}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{319CFC39-E0F3-4789-9914-871D8A0B5A68}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{319CFC39-E0F3-4789-9914-871D8A0B5A68}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

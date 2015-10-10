@@ -1,0 +1,154 @@
+﻿@{
+    ViewBag.Title = "Game";
+}
+
+@section head
+{
+    <link href="~/Content/bootstrap.css" rel="stylesheet" />
+    <script src="~/Scripts/handlebars-v4.0.2.js"></script>
+
+@*    <script src="~/Scripts/jquery.signalR-2.2.0.js"></script>
+    <script src="signalr/hubs"></script>*@
+}
+
+<script type="text/javascript">
+        //$(function () {
+        //    // Declare a proxy to reference the hub. 
+        //    var chat = $.connection.chatHub;
+
+        //    // Create a function that the hub can call to broadcast messages.
+        //    chat.client.broadcastMessage = function (name, message) {
+        //        // Html encode display name and message. 
+        //        var encodedName = $('<div />').text(name).html();
+        //        var encodedMsg = $('<div />').text(message).html();
+        //        // Add the message to the page. 
+        //        $('#discussion').append('<li><strong>' + encodedName
+        //            + '</strong>:&nbsp;&nbsp;' + encodedMsg + '</li>');
+        //    };
+
+        //    // Get the user name and store it to prepend to messages.
+        //    $('#displayname').val(prompt('Enter your name:', ''));
+
+        //    // Set initial focus to message input box.  
+        //    $('#message').focus();
+
+        //    // Start the connection.
+        //    $.connection.hub.start().done(function () {
+        //        $('#sendmessage').click(function () {
+        //            // Call the Send method on the hub. 
+        //            chat.server.send($('#displayname').val(), $('#message').val());
+        //            // Clear text box and reset focus for next comment. 
+        //            $('#message').val('').focus();
+        //        });
+        //    });
+        //});
+    </script>
+
+
+<h2>Index</h2>
+
+<style type="text/css">
+    #f1_container {
+  position: relative;
+  margin: 10px auto;
+  width: 450px;
+  height: 281px;
+  z-index: 1;
+    perspective: 1000;
+}
+
+#f1_card {
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: all 1.0s linear;
+}
+#f1_container:hover #f1_card {
+  transform: rotateY(180deg);
+  box-shadow: -5px 5px 5px #aaa;
+}
+.panel {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+}
+.panel.flip {
+  display: block;
+  transform: rotateY(180deg);
+  box-sizing: border-box;
+  padding: 10px;
+  color: white;
+  text-align: center;
+  background-color: #aaa;
+}
+
+</style>
+
+<div id="board" class="container">
+    <input type="text" id="message" />
+        <input type="button" id="sendmessage" value="Send" />
+        <input type="hidden" id="displayname" />
+        <ul id="discussion">
+        </ul>
+
+
+</div>
+
+<script id="card-template" type="text/x-handlebars-template">
+    <div class="row">
+        {{#each Pieces}}
+            <div id="{{Name}}" class="click panel col-lg-2">
+                <div class="front">
+                    <img src="/Content/img/back.png" width="150" height="150" style="opacity:.125;" />
+                </div>
+                <div class="back">
+                    <img src="/Content/img/back.png" width="150" height="150" />
+                </div>
+            </div>
+            {{#endRow @@Index}}
+                </div>
+                <div class="row">
+            {{/endRow}}
+        {{/each}}
+    </div>
+
+</script>
+
+<div id="board" class="container"></div>
+
+<script type="text/javascript">
+    $(function(){
+        Handlebars.registerHelper('endRow', function (conditional, options) {
+            if ((conditional + 1) % 5 == 0 && conditional > 0) {
+                return options.fn(this);
+            };
+            return "";
+        });
+
+        var game = { Pieces: new Array() };
+        game.Pieces[0] = {Name: 'card-1'};
+        game.Pieces[1] = {Name: 'card-2'};
+        game.Pieces[2] = {Name: 'card-3'};
+        game.Pieces[3] = {Name: 'card-4'};
+        game.Pieces[4] = {Name: 'card-5'};
+        game.Pieces[5] = {Name: 'card-6'};
+        game.Pieces[6] = {Name: 'card-7'};
+        game.Pieces[7] = {Name: 'card-8'};
+        game.Pieces[8] = {Name: 'card-9'};
+        game.Pieces[9] = {Name: 'card-10'};
+        game.Pieces[10] = {Name: 'card-11'};
+        game.Pieces[11] = {Name: 'card-12'};
+        game.Pieces[12] = {Name: 'card-13'};
+        game.Pieces[13] = {Name: 'card-14'};
+        game.Pieces[14] = { Name: 'card-15' };
+
+        var template = Handlebars.compile($('#card-template').html());
+        // render the board
+        $('#board').html(template(game));
+
+    });
+    
+</script>
+
+
